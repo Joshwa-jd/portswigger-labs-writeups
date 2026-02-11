@@ -7,13 +7,13 @@ This repository contains my structured lab writeups from PortSwigger Web Securit
 ## 📚 Categories
 
 ### 🔥 DOM-Based XSS
-- Coming soon
+
 
 ### 💉 Reflected XSS
-- Coming soon
+
 
 ### 🗄 Stored XSS
-- Coming soon
+
 
 ---
 
