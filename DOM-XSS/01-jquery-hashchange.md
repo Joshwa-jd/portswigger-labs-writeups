@@ -6,7 +6,7 @@ This lab demonstrates a **DOM-based Cross-Site Scripting (XSS)** vulnerability c
 
 The vulnerability is entirely client-side and triggered through manipulation of the URL fragment (`window.location.hash`).
 
----
+
 
 ## 🔍 Vulnerable Code
 
@@ -17,8 +17,8 @@ $(window).on('hashchange', function(){
     if (post) post.get(0).scrollIntoView();
 });
 
-⚠ Root Cause
 
+## ⚠ Root Cause
 The application:
 
 Reads data from window.location.hash
@@ -29,15 +29,16 @@ Injects it directly into a jQuery selector
 
 Does not sanitize or escape the input
 
-Dangerous Sink
-:contains(USER_INPUT)
 
+## Dangerous Sink
+:contains(USER_INPUT)
 
 Since USER_INPUT originates from the URL fragment, it is fully attacker-controlled.
 
 This leads to DOM-based XSS.
 
-🚀 Exploitation Strategy
+
+## 🚀 Exploitation Strategy
 
 The vulnerable code executes only when the hashchange event fires.
 
@@ -48,65 +49,47 @@ Malicious Payload
 onload="this.src=this.src+'<img src=x onerror=print()>'">
 </iframe>
 
-🔬 Exploitation Flow
-1️⃣ Victim visits exploit page
 
+🔬 Exploitation Flow
+
+1️⃣ Victim visits exploit page
 The victim loads the attacker-controlled exploit server.
 
 2️⃣ iframe loads vulnerable application
-
-The application loads with an empty hash:
-
-https://LAB-ID.web-security-academy.net/#
-
-
+The application loads with an empty hash: https://LAB-ID.web-security-academy.net/#
 The vulnerable script is waiting for a hash change.
+
 3️⃣ iframe modifies the hash
-
 When the iframe finishes loading:
-
 this.src = this.src + '<img src=x onerror=print()>'
 
-
-The URL becomes:
-
-https://LAB-ID/#<img src=x onerror=print()>
-
-
+The URL becomes: https://LAB-ID/#<img src=x onerror=print()>
 The hash changes → hashchange event fires.
 
 4️⃣ Vulnerable function executes
-
-The application processes:
-
-decodeURIComponent(window.location.hash.slice(1))
+The application processes: decodeURIComponent(window.location.hash.slice(1))
 
 
-Which extracts:
+Which extracts: <img src=x onerror=print()>
 
-<img src=x onerror=print()>
 5️⃣ Selector Injection
 
-The jQuery selector becomes:
-
-$('section.blog-list h2:contains(<img src=x onerror=print()>)')
-
-
+The jQuery selector becomes: $('section.blog-list h2:contains(<img src=x onerror=print()>)')
 This breaks the selector context and injects HTML into the DOM.
 
-6️⃣ JavaScript Execution
-<img src=x onerror=print()>
 
+6️⃣ JavaScript Execution
+`<img src=x onerror=print()>`
 
 src=x fails
 
 onerror executes
-
 print() runs
-
 Lab is solved
 
-Attack Flow Summary
+
+## Attack Flow Summary
+
 Victim
  ↓
 Exploit Server
@@ -130,13 +113,9 @@ print()
 If exploited in a real application, this vulnerability could allow:
 
 Arbitrary JavaScript execution
-
 Session hijacking
-
 CSRF token theft
-
 DOM manipulation
-
 Credential harvesting
 
 Since the attack is DOM-based, server logs may not clearly show the payload.
@@ -146,11 +125,8 @@ Since the attack is DOM-based, server logs may not clearly show the payload.
 Developers should:
 
 Never inject raw user input into selectors.
-
 Escape or validate URL fragment data.
-
 Avoid constructing dynamic selectors with string concatenation.
-
 Use safer DOM APIs.
 
 Example safer approach:
@@ -162,15 +138,10 @@ $('section.blog-list h2').filter(function() {
 🧠 Key Takeaways
 
 URL fragments are attacker-controlled.
-
 hashchange events can trigger hidden execution paths.
-
 jQuery selectors can become dangerous sinks.
-
 DOM XSS requires no server interaction.
-
 Proper input handling is critical in client-side code.
-
 Practicing web exploitation responsibly in controlled environments.
 
 
